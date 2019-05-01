@@ -14,7 +14,8 @@ import {
 
 @Component({
   selector: 'sky-media-query-demo',
-  templateUrl: './media-query-demo.component.html'
+  templateUrl: './media-query-demo.component.html',
+  styleUrls: ['./media-query-demo.component.scss']
 })
 export class SkyMediaQueryDemoComponent implements OnDestroy {
   public currentBreakpoint: string;
