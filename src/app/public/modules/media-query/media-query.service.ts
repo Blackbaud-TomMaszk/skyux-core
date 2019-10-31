@@ -9,6 +9,10 @@ import {
 } from 'rxjs/BehaviorSubject';
 
 import {
+  Observable
+} from 'rxjs/Observable';
+
+import {
   Subscription
 } from 'rxjs/Subscription';
 
@@ -22,16 +26,21 @@ import {
 
 @Injectable()
 export class SkyMediaQueryService implements OnDestroy {
+
   public static xs = '(max-width: 767px)';
   public static sm = '(min-width: 768px) and (max-width: 991px)';
   public static md = '(min-width: 992px) and (max-width: 1199px)';
   public static lg = '(min-width: 1200px)';
 
+  public get breakpointsChange(): Observable<SkyMediaBreakpoints> {
+    return this._breakpointsChange.asObservable();
+  }
+
   public get current(): SkyMediaBreakpoints {
     return this._current;
   }
 
-  private currentSubject = new BehaviorSubject<SkyMediaBreakpoints>(this.current);
+  private _breakpointsChange = new BehaviorSubject<SkyMediaBreakpoints>(this.current);
 
   private _current = SkyMediaBreakpoints.md;
 
@@ -70,20 +79,26 @@ export class SkyMediaQueryService implements OnDestroy {
 
   public ngOnDestroy(): void {
     this.removeListeners();
-    this.currentSubject.complete();
+    this._breakpointsChange.complete();
   }
 
+  /**
+   * Fires when window breakpoints change.
+   * @deprecated Please subscribe to the `breakpointsChange` observable, instead.
+   */
   public subscribe(listener: SkyMediaQueryListener): Subscription {
-    return this.currentSubject.subscribe({
+    return this._breakpointsChange.subscribe({
       next: (breakpoints: SkyMediaBreakpoints) => {
         listener(breakpoints);
       }
     });
   }
 
+  /**
+   * @deprecated Do not use. The dismantling of this service is handled automatically.
+   */
   public destroy(): void {
-    this.removeListeners();
-    this.currentSubject.complete();
+    this.ngOnDestroy();
   }
 
   private addListeners(): void {
@@ -123,6 +138,6 @@ export class SkyMediaQueryService implements OnDestroy {
 
   private notifyBreakpointChange(breakpoint: SkyMediaBreakpoints): void {
     this._current = breakpoint;
-    this.currentSubject.next(breakpoint);
+    this._breakpointsChange.next(breakpoint);
   }
 }
